@@ -7,7 +7,47 @@ from pydantic import BaseModel
 import os
 
 from services.document_processor import DocumentProcessor
+
 from services.similarity_analyzer import SimilarityAnalyzer
+
+# --- utility to clamp any percentage-like values in nested results ---
+def _clamp_percentages(obj):
+    """
+    Recursively clamp any numeric/string percentage-like fields in dicts/lists to [0, 100].
+    Keys that include 'percent', 'percentage', 'similarity', or 'score' are treated as percentage-like.
+    Strings with a trailing '%' are parsed and rewritten.
+    """
+    keys_like_percentage = ("percent", "percentage", "similarity", "score")
+
+    def _is_pct_key(k: str) -> bool:
+        lk = k.lower()
+        return any(s in lk for s in keys_like_percentage)
+
+    if isinstance(obj, dict):
+        for k, v in list(obj.items()):
+            if isinstance(v, (int, float)) and _is_pct_key(k):
+                obj[k] = max(0.0, min(100.0, float(v)))
+            elif isinstance(v, str) and _is_pct_key(k):
+                sv = v.strip()
+                if sv.endswith("%"):
+                    try:
+                        num = float(sv[:-1].strip())
+                        obj[k] = f"{max(0.0, min(100.0, num))}%"
+                    except ValueError:
+                        obj[k] = v
+                else:
+                    try:
+                        num = float(sv)
+                        obj[k] = max(0.0, min(100.0, num))
+                    except ValueError:
+                        obj[k] = v
+            else:
+                obj[k] = _clamp_percentages(v)
+        return obj
+    elif isinstance(obj, list):
+        return [_clamp_percentages(x) for x in obj]
+    else:
+        return obj
 
 app = FastAPI(title="Plagiarism Detection API", version="1.0.0")
 
@@ -82,6 +122,7 @@ async def analyze_documents(
             corpus_filenames=corpus_filenames
         )
         
+        results = _clamp_percentages(results)
         return JSONResponse(content=results)
     
     except Exception as e:
@@ -105,6 +146,7 @@ async def analyze_texts(request: AnalysisRequest):
             corpus_filenames=[f"corpus_{i}" for i in range(len(request.corpus_texts))]
         )
         
+        results = _clamp_percentages(results)
         return JSONResponse(content=results)
     
     except Exception as e:
