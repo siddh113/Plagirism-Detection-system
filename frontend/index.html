@@ -5,8 +5,43 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Plagiarism Detection System</title>
+    <style>
+      /* Highlight colors for plagiarism severity */
+      :root {
+        --plag-low-bg: #d4f8d4;     /* light green */
+        --plag-mid-bg: #fff8c4;     /* light yellow */
+        --plag-high-bg: #ffd6d6;    /* light red */
+        --plag-border: rgba(0,0,0,0.08);
+        --plag-text: #222;
+      }
+
+      .plag-legend {
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        display: flex; gap: 12px; align-items: center; justify-content: center;
+        padding: 10px 12px; margin: 8px auto 0; max-width: 960px;
+        border-bottom: 1px solid var(--plag-border);
+      }
+      .plag-legend__item { display: inline-flex; gap: 8px; align-items: center; color: var(--plag-text); font-size: 14px; }
+      .plag-chip { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--plag-border); }
+      .plag-chip.low { background: var(--plag-low-bg); }
+      .plag-chip.mid { background: var(--plag-mid-bg); }
+      .plag-chip.high { background: var(--plag-high-bg); }
+
+      /* Inline highlight spans */
+      .plag-low  { background: var(--plag-low-bg);  border-bottom: 2px solid #8bd48b; }
+      .plag-mid  { background: var(--plag-mid-bg);  border-bottom: 2px solid #e6d25b; }
+      .plag-high { background: var(--plag-high-bg); border-bottom: 2px solid #e48f8f; }
+
+      /* Optional: tooltip styling if you add title attributes */
+      .plag-low, .plag-mid, .plag-high { cursor: help; }
+    </style>
   </head>
   <body>
+    <div class="plag-legend" aria-label="Plagiarism highlight legend">
+      <span class="plag-legend__item"><span class="plag-chip low"></span> Low (≤ 30%)</span>
+      <span class="plag-legend__item"><span class="plag-chip mid"></span> Medium (31–70%)</span>
+      <span class="plag-legend__item"><span class="plag-chip high"></span> High (&gt; 70%)</span>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

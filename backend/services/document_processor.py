@@ -6,7 +6,7 @@ class DocumentProcessor:
     Handles document processing and text chunking.
     """
     
-    def __init__(self, chunk_size: int = 500, chunk_overlap: int = 50):
+    def __init__(self, chunk_size: int = 300, chunk_overlap: int = 50):
         """
         Initialize document processor.
         
